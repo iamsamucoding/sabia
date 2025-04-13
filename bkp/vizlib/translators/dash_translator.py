@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import html
 from dash import dcc
-from ..layout import Container, Row, Column
+from ..layout import Container, Row, Col
 from ..components.charts import Chart
 from ..components.tables import Table
 import dash
@@ -34,7 +34,7 @@ class DashTranslator:
 
         return dbc.Row(
             children=[DashTranslator.translate_column(
-                col) for col in row.columns],
+                col) for col in row.cols],
             justify=justify,
             align=align
         )
@@ -43,16 +43,6 @@ class DashTranslator:
     def translate_column(column):
         # Map span values to Bootstrap classes
         col_class = f"col-{column.span}"
-        if column.sm:
-            col_class += f" col-sm-{column.sm}"
-        if column.md:
-            col_class += f" col-md-{column.md}"
-        if column.lg:
-            col_class += f" col-lg-{column.lg}"
-        if column.xl:
-            col_class += f" col-xl-{column.xl}"
-        if column.offset:
-            col_class += f" offset-{column.offset}"
 
         return dbc.Col(
             children=[DashTranslator.translate_child(
@@ -62,15 +52,36 @@ class DashTranslator:
 
     @staticmethod
     def translate_chart(chart):
+        """Simple chart translation to Dash components"""
+        if isinstance(chart, BarChart):
+            return DashTranslator._translate_bar(chart)
+        # elif isinstance(chart, LineChart):
+        #     return DashTranslator._translate_line(chart)
+        # elif isinstance(chart, PieChart):
+        #     return DashTranslator._translate_pie(chart)
+        # else:
+        #     return dcc.Graph(figure={'data': chart.data, 'layout': {'title': chart.title}})
+    
+    @staticmethod
+    def _translate_bar(chart):
+        """Simple bar chart translation"""
         figure = {
-            'data': chart.data,
+            'data': [{
+                'x': series['x'],
+                'y': series['y'],
+                'name': series.get('name', ''),
+                'type': 'bar',
+                'orientation': 'h' if chart.horizontal else 'v'
+            } for series in chart.data],
             'layout': {
                 'title': chart.title,
-                'xaxis': chart.x_axis or {},
-                'yaxis': chart.y_axis or {}
+                'barmode': 'stack' if chart.stacked else 'group',
+                'xaxis': chart.x_axis,
+                'yaxis': chart.y_axis
             }
         }
         return dcc.Graph(figure=figure)
+        
 
     @staticmethod
     def translate_table(table):
@@ -92,7 +103,7 @@ class DashTranslator:
             return DashTranslator.translate_container(child)
         elif isinstance(child, Row):
             return DashTranslator.translate_row(child)
-        elif isinstance(child, Column):
+        elif isinstance(child, Col):
             return DashTranslator.translate_column(child)
         elif isinstance(child, Chart):
             return DashTranslator.translate_chart(child)
@@ -108,8 +119,7 @@ class DashTranslator:
         app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
         app.layout = html.Div([
-            html.H1(dashboard.title),
-            DashTranslator.translate_container(dashboard.container)
-        ])
+            html.H1(dashboard.title)
+        ] + [DashTranslator.translate_container(container) for container in dashboard.containers])
 
         return app

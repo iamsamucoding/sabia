@@ -24,8 +24,21 @@ class Row:
         self.style = style or {}
         self.justify = justify  # start, center, end, between, around
         self.align = align      # start, center, end
-        self.columns = []
+        self.cols = cols or []
 
     def add_column(self, column):
         self.columns.append(column)
+        return self
+
+
+class Col:
+    def __init__(self, class_name=None, style=None, span=12, offset=None,):
+        self.class_name = class_name
+        self.style = style or {}
+        self.children = []
+        self.span = span
+        self.offset = offset
+
+    def add_child(self, child):
+        self.children.append(child)
         return self
