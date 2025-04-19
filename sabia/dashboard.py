@@ -6,12 +6,24 @@ from dash import html
 import dash
 
 from .layout import Container
-from .render import RenderEngineFactory
 
 class DashboardHeader:
     def __init__(self, title: str, subtitle: str = ""):
         self.title = title
         self.subtitle = subtitle
+    
+    def render(self, engine: str = "dash"):
+        """Render the header using the specified engine"""
+        if engine == "dash":
+            return html.Div(
+                [
+                    html.H1(self.title),
+                    html.H2(self.subtitle)
+                ],
+                className="dashboard-header"
+            )
+        else:
+            raise ValueError(f"Unsupported engine: {engine}")
 
 class Dashboard:
     def __init__(self, title: str,
@@ -27,7 +39,7 @@ class Dashboard:
     def render(self, engine: str = "dash"):
         """Render the dashboard using the specified engine"""
         if engine == "dash":
-            dashboard = dash.Dash(self.title, external_stylesheets=[dbc.themes.BOOTSTRAP])
+            dashboard = dash.Dash(self.header.title, external_stylesheets=[dbc.themes.BOOTSTRAP])
             
             dashboard.layout = html.Div(
                 [
