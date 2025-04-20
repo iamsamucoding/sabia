@@ -40,27 +40,42 @@ class DashLayoutRenderer(LayoutRenderer):
         )
         return rendered_dashboard
 
-    def render_container(self, container: Container) -> dbc.Container:
+    def render_container(self, container_in: Container) -> dbc.Container:
+        container = container_in.copy()
+        
         children = []
         for child in container.children:
             children.append(self.render_row(child))
         
         kwargs = container.kwargs.copy()
         kwargs['children'] = children
+        kwargs['className'] = container.class_name
+        kwargs['fluid'] = container.fluid
         
         return dbc.Container(**kwargs)
 
-    def render_row(self, row: Row) -> dbc.Row:
+    def render_row(self, row_in: Row) -> dbc.Row:
+        row = row_in.copy()
+        
         children = []
         
         for child in row.children:
             children.append(self.render_col(child))
         
         kwargs = row.kwargs.copy()
-        kwargs['children'] = children
         
+        kwargs['children'] = children
+        kwargs['className'] = row.class_name
+
         return dbc.Row(**kwargs)
     
-    def render_col(self, col: Col) -> dbc.Col:
+    def render_col(self, col_in: Col) -> dbc.Col:
+        col = col_in.copy()
+
+        col.kwargs['children'] = col.children
+        col.kwargs['className'] = col.class_name
+        col.kwargs['style'] = col.style or {}
+        col.kwargs['width'] = col.width
+
         return dbc.Col(**col.kwargs)
 
