@@ -19,7 +19,7 @@ class Col:
     Custom Column class that extends the Dash Bootstrap Components Column class.
     It allows for additional attributes to be set for the column layout.
     """
-    def __init__(self, children=None, width=None, class_name=None, style=None,
+    def __init__(self, children=None, width=None, class_name=None,
                 mt: int = None,
                 mb: int = None,
                 ml: int = None,
@@ -34,7 +34,6 @@ class Col:
         self.width = width  # e.g., 'auto', '50%', etc.
         self.auto_width = (width is None)
         self.class_name = class_name
-        self.style = style or {}
         
         assert mt is None or mt >= 0, \
             "Top margin must be None or a positive number"
@@ -44,17 +43,23 @@ class Col:
             "Left margin must be None or a positive number"
         assert mr is None or mr >= 0, \
             "Right margin must be None or a positive number"
+        
         self.mt = mt
         self.mb = mb
         self.ml = ml
         self.mr = mr
+        self.margin = Margin(mt, mb, ml, mr)
 
         self.kwargs = copy.deepcopy(kwargs) or {}
     
     def copy(self):
         """Returns a copy of the column object"""
         return Col(children=self.children, width=self.width,
-                   class_name=self.class_name, style=self.style,
+                   class_name=self.class_name,
+                   mt=self.margin.top,
+                   mb=self.margin.bottom,
+                   ml=self.margin.left,
+                   mr=self.margin.right,
                    kwargs=self.kwargs)
 
         
@@ -63,9 +68,29 @@ class Row:
     def __init__(self, 
                  children: List[Col] = None,
                  class_name: str = "",
+                 mt: int = None,
+                 mb: int = None,
+                 ml: int = None,
+                 mr: int = None,
                  kwargs: dict = None):
         self.children = children or []
         self.class_name = class_name
+
+        assert mt is None or mt >= 0, \
+            "Top margin must be None or a positive number"
+        assert mb is None or mb >= 0, \
+            "Bottom margin must be None or a positive number"
+        assert ml is None or ml >= 0, \
+            "Left margin must be None or a positive number"
+        assert mr is None or mr >= 0, \
+            "Right margin must be None or a positive number"
+        
+        self.mt = mt
+        self.mb = mb
+        self.ml = ml
+        self.mr = mr
+        self.margin = Margin(mt, mb, ml, mr)
+
         self.kwargs = copy.deepcopy(kwargs) or {}
         self._auto_col_width()
 
@@ -111,7 +136,12 @@ class Row:
     def copy(self):
         """Returns a copy of the row object"""
         return Row(children=[child.copy() for child in self.children],
-                   class_name=self.class_name, kwargs=self.kwargs)
+                   class_name=self.class_name,
+                   mt=self.margin.top,
+                         mb=self.margin.bottom,
+                         ml=self.margin.left,
+                         mr=self.margin.right,
+                         kwargs=self.kwargs)
 
     def add_col(self, col: Col) -> 'Row':
         """Helper method to add columns directly to the row"""

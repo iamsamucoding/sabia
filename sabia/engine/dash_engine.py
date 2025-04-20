@@ -70,8 +70,7 @@ class DashLayoutRenderer(LayoutRenderer):
         for child in container.children:
             children.append(self.render_row(child))
         
-        class_name = container.class_name
-
+        class_name = container.class_name or ""
         class_name += process_margin_classes(
             container.margin.top,
             container.margin.bottom,
@@ -90,15 +89,29 @@ class DashLayoutRenderer(LayoutRenderer):
         
         for child in row.children:
             children.append(self.render_col(child))
+
+        class_name = row.class_name or ""
+        class_name += process_margin_classes(
+            row.margin.top,
+            row.margin.bottom,
+            row.margin.left,
+            row.margin.right
+        )
         
-        return dbc.Row(children=children, class_name=row.class_name, **row.kwargs)
+        return dbc.Row(children=children, class_name=class_name, **row.kwargs)
     
     def render_col(self, col_in: Col) -> dbc.Col:
         col = col_in.copy()
 
+        class_name = col.class_name or ""
+        class_name += process_margin_classes(
+            col.margin.top,
+            col.margin.bottom,
+            col.margin.left,
+            col.margin.right
+        )
+
         return dbc.Col(children=col.children,
-                       class_name=col.class_name,
-                       style=col.style,
-                       width=col.width,
+                       class_name=class_name,
                        **col.kwargs)
 

@@ -44,11 +44,11 @@ dashboard.add_container(
     Container([
         # Row 1: Charts
         Row([
-            Col([dcc.Graph(figure=line_fig)]),  # Auto width
+            Col([dcc.Graph(figure=line_fig)], mt=5, mb=5),  # Auto width
             Col([dcc.Graph(figure=bar_fig)], width=6),   # Auto width
             Col([dcc.Graph(figure=bar_fig)]),   # Auto width
-        ]),
-    ], mt=5, mb=5))
+        ], mt=5, mb=5),
+    ]))
     
 
 # dashboard.add_container(
