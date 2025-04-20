@@ -1,5 +1,8 @@
 from typing import List, Optional, Any
 import dash_bootstrap_components as dbc
+import math
+
+GRID_NUM_COLS = 12
 
 
 class Col:
@@ -10,7 +13,12 @@ class Col:
     def __init__(self, children=None, width=None, class_name=None, style=None, **kwargs):
         self.children = children or []
         self.children = children if isinstance(children, list) else [children]
+
+        assert width is None or (width > 0 and width <= 12), \
+            "Width must be None or a number between 1 and 12"
+
         self.width = width  # e.g., 'auto', '50%', etc.
+        self.auto_width = (width is None)
         self.class_name = class_name
         self.style = style or {}
         
@@ -42,10 +50,52 @@ class Row:
         kwargs['children'] = self.children
         kwargs['className'] = class_name
         self.kwargs = kwargs
+        self._auto_col_width()
+
+    def _auto_col_width(self):
+        auto_col_index = []
+        total_col_width = 0
+
+        for i, child in enumerate(self.children):
+            if child.width is None:
+                auto_col_index.append(i)
+            else:
+                total_col_width += child.width
+        
+        remaining_width = GRID_NUM_COLS - total_col_width
+        auto_col_width = int(math.ceil(remaining_width / len(auto_col_index))) if auto_col_index else 0
+        ceil_remaining_width = auto_col_width * len(auto_col_index)
+        # print()
+        # print(f'Auto column width: {auto_col_width}, Remaining width: {remaining_width}, Total width: {total_col_width}')
+        # print(f'ceil_remaining_width = {ceil_remaining_width}, remaining_width = {remaining_width}')
+        
+        for i in auto_col_index:
+            self.children[i].width = auto_col_width
+        
+        # Adjust the widths of the auto columns to fit within the remaining width
+        # This is to ensure that the total width of the columns does not exceed GRID_NUM_COLS
+        # and to avoid any floating point issues.
+        i = len(auto_col_index) - 1
+        while ceil_remaining_width > remaining_width and i > 0:
+            self.children[auto_col_index[i]].width -= 1
+            ceil_remaining_width -= 1
+            i -= 1
+        
+        self.kwargs['children'] = self.children
+        # self.print_widths()
+        # print()
+
+    
+    def print_widths(self):
+        """Prints the widths of the columns in the row"""
+        for i, child in enumerate(self.children):
+            print(f"Column {i}: {child.width}")
+        print(f"Total Width: {sum(child.width for child in self.children)}")
     
     def add_col(self, *args, **kwargs) -> 'Row':
         """Helper method to add columns directly to the row"""
         self.children.append(Col(*args, **kwargs))
+        self._auto_col_width()
         return self
     
     def render(self, engine: str = "dash"):
