@@ -1,6 +1,7 @@
 from typing import List, Optional, Any
 import dash_bootstrap_components as dbc
 import math
+import copy
 
 GRID_NUM_COLS = 12
 
@@ -10,7 +11,7 @@ class Col:
     Custom Column class that extends the Dash Bootstrap Components Column class.
     It allows for additional attributes to be set for the column layout.
     """
-    def __init__(self, children=None, width=None, class_name=None, style=None, **kwargs):
+    def __init__(self, children=None, width=None, class_name=None, style=None, kwargs: dict = None):
         self.children = children or []
         self.children = children if isinstance(children, list) else [children]
 
@@ -21,21 +22,13 @@ class Col:
         self.auto_width = (width is None)
         self.class_name = class_name
         self.style = style or {}
-        
-        kwargs['children'] = self.children
-        kwargs['className'] = class_name
-        kwargs['style'] = style or {}
-        kwargs['width'] = width
-        self.kwargs = kwargs
-
-    def render(self, engine: str = "dash"):
-        """
-        Renders the column using the specified engine.
-        """
-        if engine == "dash":
-            return dbc.Col(**self.kwargs)
-        else:
-            raise ValueError(f"Unsupported engine: {engine}")
+        self.kwargs = copy.deepcopy(kwargs) or {}
+    
+    def copy(self):
+        """Returns a copy of the column object"""
+        return Col(children=self.children, width=self.width,
+                   class_name=self.class_name, style=self.style,
+                   kwargs=self.kwargs)
 
         
 class Row:
@@ -43,13 +36,10 @@ class Row:
     def __init__(self, 
                  children: List[Col] = None,
                  class_name: str = "",
-                 **kwargs):
+                 kwargs: dict = None):
         self.children = children or []
         self.class_name = class_name
-
-        kwargs['children'] = self.children
-        kwargs['className'] = class_name
-        self.kwargs = kwargs
+        self.kwargs = copy.deepcopy(kwargs) or {}
         self._auto_col_width()
 
     def _auto_col_width(self):
@@ -81,7 +71,6 @@ class Row:
             ceil_remaining_width -= 1
             i -= 1
         
-        self.kwargs['children'] = self.children
         # self.print_widths()
         # print()
 
@@ -92,29 +81,16 @@ class Row:
             print(f"Column {i}: {child.width}")
         print(f"Total Width: {sum(child.width for child in self.children)}")
     
-    def add_col(self, *args, **kwargs) -> 'Row':
+    def copy(self):
+        """Returns a copy of the row object"""
+        return Row(children=[child.copy() for child in self.children],
+                   class_name=self.class_name, kwargs=self.kwargs)
+
+    def add_col(self, col: Col) -> 'Row':
         """Helper method to add columns directly to the row"""
-        self.children.append(Col(*args, **kwargs))
+        self.children.append(col)
         self._auto_col_width()
         return self
-    
-    def render(self, engine: str = "dash"):
-        """
-        Renders the row using the specified engine.
-        """
-        if engine == "dash":
-            children = []
-            for child in self.children:
-                children.append(child.render(engine))
-            
-            kwargs = self.kwargs.copy()
-            kwargs['children'] = children
-            
-            row = dbc.Row(**kwargs)
-
-            return row
-        else:
-            raise ValueError(f"Unsupported engine: {engine}")
 
 class Container:
     """Simplified Container wrapper that mimics dbc.Container parameters"""
@@ -122,35 +98,19 @@ class Container:
                  children: List[Row] = None,
                  class_name: str = "",
                  fluid: bool = True,
-                 **kwargs):
+                 kwargs: dict = None):
         self.children = children or []
         self.class_name = class_name
         self.fluid = fluid
-
-        kwargs['children'] = self.children
-        kwargs['className'] = class_name
-        kwargs['fluid'] = fluid
-        self.kwargs = kwargs
+        self.kwargs = copy.deepcopy(kwargs) or {}
     
-    def add_row(self, *args, **kwargs) -> 'Container':
+    def copy(self):
+        """Returns a copy of the container object"""
+        return Container(children=[child.copy() for child in self.children],
+                         class_name=self.class_name, fluid=self.fluid, kwargs=self.kwargs)
+    
+    def add_row(self, row: Row) -> 'Container':
         """Helper method to add rows directly to the container"""
-        self.children.append(Row(*args, **kwargs))
+        self.children.append(row)
         return self
     
-    def render(self, engine: str = "dash"):
-        """
-        Renders the container using the specified engine.
-        """
-        if engine == "dash":
-            children = []
-            for child in self.children:
-                children.append(child.render(engine))
-            
-            kwargs = self.kwargs.copy()
-            kwargs['children'] = children
-            
-            container = dbc.Container(**kwargs)
-
-            return container
-        else:
-            raise ValueError(f"Unsupported engine: {engine}")
