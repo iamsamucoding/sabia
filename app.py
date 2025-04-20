@@ -9,6 +9,8 @@ import numpy as np
 from sabia.layout import Container, Row, Col
 from sabia.dashboard import Dashboard
 
+from sabia.engine import EngineFactory
+
 # 1. Generate Fake Data
 np.random.seed(42)
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
@@ -83,7 +85,8 @@ dashboard.add_container(
     ])
 )
 
-app = dashboard.render(engine="dash")
+dash_engine = EngineFactory.create_engine('dash')
+app = dash_engine.render(dashboard)
 
 if __name__ == '__main__':
     app.run(port=8050, debug=True)
