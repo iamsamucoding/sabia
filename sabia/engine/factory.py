@@ -2,7 +2,7 @@ from .dash_engine import DashEngine
 
 class EngineFactory:
     @staticmethod
-    def create_engine(engine_type: str) -> 'RenderEngine':
+    def create_engine(engine_type: str = 'dash') -> 'RenderEngine':
         engine_type_lw = engine_type.lower()
 
         engines = {
