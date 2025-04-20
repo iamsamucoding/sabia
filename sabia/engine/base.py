@@ -5,11 +5,6 @@ import pandas as pd
 from ..layout import Container, Row, Col
 from ..dashboard import DashboardHeader, Dashboard
 
-class Engine(ABC):
-    def render(self, dashboard: Dashboard):
-        pass
-
-
 class LayoutRenderer(ABC):
     def render_dashboard_header(self, header: DashboardHeader):
         pass
@@ -24,4 +19,10 @@ class LayoutRenderer(ABC):
         pass
 
     def render_row(self, row: Row):
+        pass
+
+class Engine(ABC):
+    layout_renderer: LayoutRenderer
+    
+    def render(self, dashboard: Dashboard):
         pass
