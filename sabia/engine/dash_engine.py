@@ -9,6 +9,29 @@ import dash_bootstrap_components as dbc
 import dash
 from dash import html
 
+# https://dash-bootstrap-components.opensource.faculty.ai/docs/components/layout/
+
+def process_margin_classes(
+    top: int,
+    bottom: int,
+    left: int,
+    right: int
+) -> str:
+        """Generate Bootstrap margin classes from individual margin parameters."""
+        classes = []
+        
+        if top is not None:
+            classes.append(f"mt-{top}")
+        if bottom is not None:
+            classes.append(f"mb-{bottom}")
+        if left is not None:
+            classes.append(f"ms-{left}")
+        if right is not None:
+            classes.append(f"me-{right}")
+            
+        return " " + " ".join(classes) if classes else ""
+
+
 
 class DashEngine(Engine):
     def __init__(self):
@@ -20,7 +43,7 @@ class DashEngine(Engine):
 
 class DashLayoutRenderer(LayoutRenderer):
     def render_dashboard_header(self, header: DashboardHeader) -> html.Div:
-        return html.Div(
+        return dbc.Container(
             [
                 html.H1(header.title),
                 html.H2(header.subtitle)
@@ -47,12 +70,18 @@ class DashLayoutRenderer(LayoutRenderer):
         for child in container.children:
             children.append(self.render_row(child))
         
-        kwargs = container.kwargs.copy()
-        kwargs['children'] = children
-        kwargs['className'] = container.class_name
-        kwargs['fluid'] = container.fluid
-        
-        return dbc.Container(**kwargs)
+        class_name = container.class_name
+
+        class_name += process_margin_classes(
+            container.margin.top,
+            container.margin.bottom,
+            container.margin.left,
+            container.margin.right
+        )
+
+        return dbc.Container(children=children,
+                             class_name=class_name.strip(),
+                             fluid=container.fluid, **container.kwargs)
 
     def render_row(self, row_in: Row) -> dbc.Row:
         row = row_in.copy()
@@ -62,20 +91,14 @@ class DashLayoutRenderer(LayoutRenderer):
         for child in row.children:
             children.append(self.render_col(child))
         
-        kwargs = row.kwargs.copy()
-        
-        kwargs['children'] = children
-        kwargs['className'] = row.class_name
-
-        return dbc.Row(**kwargs)
+        return dbc.Row(children=children, class_name=row.class_name, **row.kwargs)
     
     def render_col(self, col_in: Col) -> dbc.Col:
         col = col_in.copy()
 
-        col.kwargs['children'] = col.children
-        col.kwargs['className'] = col.class_name
-        col.kwargs['style'] = col.style or {}
-        col.kwargs['width'] = col.width
-
-        return dbc.Col(**col.kwargs)
+        return dbc.Col(children=col.children,
+                       class_name=col.class_name,
+                       style=col.style,
+                       width=col.width,
+                       **col.kwargs)
 

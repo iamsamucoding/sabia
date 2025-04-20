@@ -48,7 +48,7 @@ dashboard.add_container(
             Col([dcc.Graph(figure=bar_fig)], width=6),   # Auto width
             Col([dcc.Graph(figure=bar_fig)]),   # Auto width
         ]),
-    ]))
+    ], mt=5, mb=5))
     
 
 # dashboard.add_container(

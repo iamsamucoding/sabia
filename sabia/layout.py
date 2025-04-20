@@ -4,6 +4,14 @@ import math
 import copy
 
 GRID_NUM_COLS = 12
+from dataclasses import dataclass
+
+@dataclass
+class Margin:
+    top: int = None
+    bottom: int = None
+    left: int = None
+    right: int = None
 
 
 class Col:
@@ -11,7 +19,12 @@ class Col:
     Custom Column class that extends the Dash Bootstrap Components Column class.
     It allows for additional attributes to be set for the column layout.
     """
-    def __init__(self, children=None, width=None, class_name=None, style=None, kwargs: dict = None):
+    def __init__(self, children=None, width=None, class_name=None, style=None,
+                mt: int = None,
+                mb: int = None,
+                ml: int = None,
+                mr: int = None,
+                kwargs: dict = None):
         self.children = children or []
         self.children = children if isinstance(children, list) else [children]
 
@@ -22,6 +35,20 @@ class Col:
         self.auto_width = (width is None)
         self.class_name = class_name
         self.style = style or {}
+        
+        assert mt is None or mt >= 0, \
+            "Top margin must be None or a positive number"
+        assert mb is None or mb >= 0, \
+            "Bottom margin must be None or a positive number"
+        assert ml is None or ml >= 0, \
+            "Left margin must be None or a positive number"
+        assert mr is None or mr >= 0, \
+            "Right margin must be None or a positive number"
+        self.mt = mt
+        self.mb = mb
+        self.ml = ml
+        self.mr = mr
+
         self.kwargs = copy.deepcopy(kwargs) or {}
     
     def copy(self):
@@ -92,22 +119,43 @@ class Row:
         self._auto_col_width()
         return self
 
+
 class Container:
     """Simplified Container wrapper that mimics dbc.Container parameters"""
     def __init__(self, 
                  children: List[Row] = None,
                  class_name: str = "",
-                 fluid: bool = True,
+                 fluid: bool = False,
+                 mt: int = None,
+                 mb: int = None,
+                 ml: int = None,
+                 mr: int = None,
                  kwargs: dict = None):
         self.children = children or []
         self.class_name = class_name
         self.fluid = fluid
+
+        assert mt is None or mt >= 0, \
+            "Top margin must be None or a positive number"
+        assert mb is None or mb >= 0, \
+            "Bottom margin must be None or a positive number"
+        assert ml is None or ml >= 0, \
+            "Left margin must be None or a positive number"
+        assert mr is None or mr >= 0, \
+            "Right margin must be None or a positive number"
+        
+        self.margin = Margin(mt, mb, ml, mr)
         self.kwargs = copy.deepcopy(kwargs) or {}
-    
+
     def copy(self):
         """Returns a copy of the container object"""
         return Container(children=[child.copy() for child in self.children],
-                         class_name=self.class_name, fluid=self.fluid, kwargs=self.kwargs)
+                         class_name=self.class_name, fluid=self.fluid,
+                         mt=self.margin.top,
+                         mb=self.margin.bottom,
+                         ml=self.margin.left,
+                         mr=self.margin.right,
+                         kwargs=self.kwargs)
     
     def add_row(self, row: Row) -> 'Container':
         """Helper method to add rows directly to the container"""
