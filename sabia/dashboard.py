@@ -12,18 +12,6 @@ class DashboardHeader:
         self.title = title
         self.subtitle = subtitle
     
-    def render(self, engine: str = "dash"):
-        """Render the header using the specified engine"""
-        if engine == "dash":
-            return html.Div(
-                [
-                    html.H1(self.title),
-                    html.H2(self.subtitle)
-                ],
-                className="dashboard-header"
-            )
-        else:
-            raise ValueError(f"Unsupported engine: {engine}")
 
 class Dashboard:
     def __init__(self, title: str,
