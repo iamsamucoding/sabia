@@ -1,5 +1,5 @@
 from typing import List
-from typing import Optional, Any
+from typing import Optional, Any, Dict
 
 import dash_bootstrap_components as dbc
 from dash import html
@@ -8,15 +8,24 @@ import dash
 from .layout import Container
 
 class DashboardHeader:
-    def __init__(self, title: str, subtitle: str = ""):
+    def __init__(self, title: str, subtitle: str = "", kargs: Dict = None):
         self.title = title
         self.subtitle = subtitle
-    
+        self.kargs = kargs or {}
+
+class ItauPrismaHeader(DashboardHeader):
+    def __init__(self, title, subtitle = "", last_update: str = None):
+        super().__init__(title, subtitle)
+
+        self.last_update = last_update or ""
+        self.logo_path = './assets/img/itau_logo.png'
+
+
 
 class Dashboard:
     def __init__(self, title: str,
                  subtitle: str = "",
-                 header: Optional[DashboardHeader] = None):   
+                 header: Optional[DashboardHeader] = None):
         self.header = header or DashboardHeader(title, subtitle)
         self.containers: List[Container] = []
     

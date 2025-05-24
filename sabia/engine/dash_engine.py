@@ -2,7 +2,7 @@ import abc
 from typing import Any
 
 from ..layout import Container, Row, Col
-from ..dashboard import DashboardHeader, Dashboard
+from ..dashboard import DashboardHeader, ItauPrismaHeader, Dashboard
 from .base import Engine, LayoutRenderer
 
 import dash_bootstrap_components as dbc
@@ -42,7 +42,7 @@ class DashEngine(Engine):
 
 
 class DashLayoutRenderer(LayoutRenderer):
-    def render_dashboard_header(self, header: DashboardHeader) -> html.Div:
+    def render_default_header(self, header: DashboardHeader) -> html.Div:
         return dbc.Container(
             [
                 html.H1(header.title),
@@ -50,6 +50,23 @@ class DashLayoutRenderer(LayoutRenderer):
             ],
             className="dashboard-header"
         )
+    
+    def render_itau_prisma_header(self, header: ItauPrismaHeader) -> html.Div:
+        return dbc.Container(
+            [
+                html.H1("OIOIOIOIOIOI"),
+                html.H2(header.subtitle)
+            ],
+            className="dashboard-header"
+        )
+
+
+    def render_dashboard_header(self, header: DashboardHeader) -> html.Div:
+        if type(header) == ItauPrismaHeader:
+            return self.render_itau_prisma_header(header)
+        
+        return self.render_default_header(header)
+    
     
     def render_dashboard(self, dashboard: Dashboard) -> dash.Dash:
         rendered_dashboard = dash.Dash(dashboard.header.title, external_stylesheets=[dbc.themes.BOOTSTRAP])

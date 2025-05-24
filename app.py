@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from sabia.layout import Container, Row, Col
-from sabia.dashboard import Dashboard
+from sabia.dashboard import Dashboard, ItauPrismaHeader
 
 from sabia.engine import EngineFactory
 
@@ -39,7 +39,9 @@ bar_fig = px.bar(
 ).update_layout(margin=dict(t=30, b=10))
 
 
-dashboard = Dashboard(title="Sales Dashboard", subtitle="Monthly Sales Overview")
+header = ItauPrismaHeader(title="Sales Dashboard", subtitle="Monthly Sales Overview")
+
+dashboard = Dashboard(title="Sales Dashboard", subtitle="Monthly Sales Overview", header=header)
 dashboard.add_container(
     Container([
         # Row 1: Charts
